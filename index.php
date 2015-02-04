@@ -1,11 +1,8 @@
+
 <?php
 
-//debugging
-error_reporting(-1);
-ini_set('display_errors', 1);
-
-$names = isset($_GET["n"]) ? explode(" ", $_GET["n"]) : explode(" ", "? ?");
-$name = strtoupper(substr($names[0], 0, 1) . substr($names[1], 0, 1));
+// initalize variables
+$name = isset($_GET["n"]) ? $_GET["n"] : "??";
 $radius = isset($_GET["r"]) ? $_GET["r"] : 150;
 $size = $radius * 2;
 
@@ -17,25 +14,24 @@ imageantialias($image, true);
 
 // define posible colours for the circle
 $colours = array(
-    imagecolorallocate($image, 241, 143, 0) => "orange",
-    imagecolorallocate($image, 128, 186, 39) => "green",
-    imagecolorallocate($image, 13, 147, 210) => "blue",
-    imagecolorallocate($image, 231, 30, 108) => "pink"
+    "orange" => imagecolorallocate($image, 241, 143, 0),
+    "green" => imagecolorallocate($image, 128, 186, 39),
+    "blue" => imagecolorallocate($image, 13, 147, 210),
+    "pink" => imagecolorallocate($image, 231, 30, 108)
 );
 
-// draw the circle with a random color
-imagefilledellipse($image, $radius, $radius, $size - 1, $size - 1, array_rand($colours));
+// draw a circle with set colour otherwise pick a random one
+$circle_col = isset($_GET["c"]) ? $colours[$_GET["c"]] : $colours[array_rand($colours)];
+imagefilledellipse($image, $radius, $radius, $size - 1, $size - 1, $circle_col);
 
-// write the text on the circle.
+// write the text on the center of the circle.
 $font = "VAGRounded-Light";
 $font_col = imagecolorallocate($image, 255, 255, 255);
-$text_box = imagettfbbox($radius, 0, $font, $name);
+$text_box = imagettfbbox($radius / 1.5, 0, $font, $name);
 $text_width = $text_box[2] - $text_box[0];
 $x = ($radius) - ($text_width / 2);
-$y = $radius + $radius / 2.2;
-
-imagettftext($image, $radius, 0, $x, $y, $font_col, $font, $name);
-
+$y = $radius * 1.35;
+imagettftext($image, $radius / 1.5, 0, $x, $y, $font_col, $font, $name);
 
 // remove the black backround
 $transparent = imagecolorallocate($image, 0, 0, 0);
@@ -46,5 +42,3 @@ header("Content-type: image/png");
 imagepng($image);
 
 imagedestroy($image);
-
-?>
